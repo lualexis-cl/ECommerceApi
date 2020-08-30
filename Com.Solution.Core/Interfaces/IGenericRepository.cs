@@ -14,8 +14,6 @@ namespace Com.Solution.Core.Interfaces
         Task<IReadOnlyList<T>> GetAllListAsync();
         Task<T> GetEntityWithSpec(ISpecification<T> spec);
         Task<IReadOnlyList<T>> ListAsync(ISpecification<T> spec);
-
-        Task<IReadOnlyList<T>> GetListAsync(Expression<Func<T, bool>> expression = null,
-            params Expression<Func<T, object>>[] includes);
+        Task<int> CountAsync(ISpecification<T> spec);
     }
 }

@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using AutoMapper;
 using Com.Solution.API.Dtos;
 using Com.Solution.API.Errors;
+using Com.Solution.API.Helpers;
 using Com.Solution.Core.Entities;
 using Com.Solution.Core.Interfaces;
 using Com.Solution.Core.Specification;
@@ -49,12 +50,23 @@ namespace Com.Solution.API.Controllers
         }
 
         [HttpGet()]
-        public async Task<ActionResult<IReadOnlyList<Product>>> GetProductList()
+        public async Task<ActionResult<Pagination<Product>>> GetProductList(
+            [FromQuery]ProductSpecParams productSpecParams)
         {
-            var spec = new ProductWithDetailSpecification();
+            var spec = new ProductWithDetailSpecification(productSpecParams);
+            var countSpec = new ProductWithFilterForCountSpecification(productSpecParams);
+
             var productList = await _productRepository.ListAsync(spec);
-            var productDtoList = _mapper.Map<IReadOnlyList<Product>, IReadOnlyList<ProductDto>>(productList);
-            return Ok(productDtoList);
+            var totalItems = await _productRepository.CountAsync(countSpec);
+            var products = _mapper.Map<IReadOnlyList<Product>, IReadOnlyList<ProductDto>>(productList);
+
+            return Ok(new Pagination<ProductDto>()
+            {
+                Count = totalItems,
+                PageIndex = productSpecParams.PageIndex,
+                PageSize = productSpecParams.PageSize,
+                Data = products
+            });
         }
 
         [HttpGet("brand")]

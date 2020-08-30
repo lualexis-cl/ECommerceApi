@@ -17,6 +17,12 @@ namespace Com.Solution.Infraestructure.Data
         {
             _storeContext = storeContext;
         }
+
+        public async Task<int> CountAsync(ISpecification<T> spec)
+        {
+            return await ApplySpecification(spec).CountAsync();
+        }
+
         public async Task<IReadOnlyList<T>> GetAllListAsync()
         {
             return await _storeContext.Set<T>().ToListAsync();
@@ -30,24 +36,6 @@ namespace Com.Solution.Infraestructure.Data
         public async Task<T> GetEntityWithSpec(ISpecification<T> spec)
         {
             return await ApplySpecification(spec).FirstOrDefaultAsync();
-        }
-
-        public async Task<IReadOnlyList<T>> GetListAsync(Expression<Func<T, bool>> expression = null, 
-            params Expression<Func<T, object>>[] includes)
-        {
-            var query = _storeContext.Set<T>();
-            includes.ToList()
-                .ForEach(include =>
-                {
-                    query.Include(include);
-                });
-
-            if (expression != null)
-            {
-                query.Where(expression);
-            }
-
-            return await query.ToListAsync();
         }
 
         public async Task<IReadOnlyList<T>> ListAsync(ISpecification<T> spec)
